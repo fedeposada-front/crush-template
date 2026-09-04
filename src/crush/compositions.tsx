@@ -1,22 +1,29 @@
 import type { ReactNode } from "react";
 import {
+  Block,
+  CoffeeBadge,
   CTA,
-  Doodle,
-  HeadlineBlock,
+  Eyebrow,
+  Highlight,
   LogoLockup,
   MediaFrame,
+  Rule,
   ScreenshotFrame,
+  TargetMark,
   type Treatment,
 } from "./brand";
 
 /* ------------------------------------------------------------------ *
- * Crush Interactive — Compositions (plan §15) & Format frame (§17)
+ * Crush Interactive — Compositions & Format frame
  * A Composition is an abstract layout contract: named zones + what is
- * fixed vs. free. The same composition renders under either treatment
- * (a semantic-alias reassignment) and any format ratio.
+ * fixed vs. free. Each primitive supports several content families
+ * (Founder POV, Quick Audit, Project Reveal, Cafecito, before/after)
+ * rather than being a locked template. The same composition renders
+ * under either treatment and any format ratio.
  * ------------------------------------------------------------------ */
 
 export type Format = "square" | "portrait" | "story";
+type Field = "auto" | "orange";
 
 const RATIO: Record<Format, string> = {
   square: "1 / 1",
@@ -30,198 +37,328 @@ export const FORMAT_LABEL: Record<Format, string> = {
   story: "9:16 · 1080×1920",
 };
 
-/* The post surface: applies treatment, ratio, gradient/dark field,
-   film grain (dark) and a subtle line-mask depth layer. */
+/* The post surface: a flat field (cream / near-black / flat orange). No
+   gradients, no default grain or line-mask. `flush` removes padding for
+   full-bleed photography. */
 export function PostFrame({
   treatment,
   format,
+  field = "auto",
+  flush = false,
   children,
   width = 340,
 }: {
   treatment: Treatment;
   format: Format;
+  field?: Field;
+  flush?: boolean;
   children: ReactNode;
   width?: number;
 }) {
   return (
     <div
       data-treatment={treatment}
-      className="crush-grain relative overflow-hidden rounded-[1.4rem] shadow-[0_30px_70px_-32px_rgba(0,0,0,0.6)]"
+      data-field={field === "orange" ? "orange" : undefined}
+      className="relative overflow-hidden"
       style={{
         width,
         aspectRatio: RATIO[format],
-        background: "var(--surface-field)",
-        color: "var(--on-field)",
+        background: "var(--surface)",
+        color: "var(--on-surface)",
       }}
     >
-      <div
-        className="crush-linemask absolute inset-x-0 bottom-0 h-2/3 opacity-[0.18]"
-        style={{ color: "var(--on-field)" }}
-        aria-hidden
-      />
-      <div className="relative flex h-full w-full flex-col p-[7%]">{children}</div>
+      {flush ? children : <div className="flex h-full w-full flex-col p-[8%]">{children}</div>}
     </div>
   );
 }
 
-/* 1 — STATEMENT: one dominant headline on the field + wordmark anchor. */
+/* 1 — STATEMENT: typography-led. Big confident headline with a skewed
+   orange highlight, a single geometric accent, and restrained supporting
+   copy. Supports thought-leadership (Founder POV) and, with `field="orange"`
+   + a checklist, educational content (Quick Audit). */
 export function StatementPost({
   treatment,
   format,
   width,
+  field = "auto",
+  eyebrow = "The Crush POV / 01",
+  lines = ["Your website", "isn't old."],
+  highlight = "It's underselling you.",
+  sub = "A better first impression starts with clarity.",
+  meta = "Strategy · Design · Technology",
+  checklist,
+  cta = "Read the POV",
+  showTarget = true,
 }: {
   treatment: Treatment;
   format: Format;
   width?: number;
+  field?: Field;
+  eyebrow?: string;
+  lines?: string[];
+  highlight?: string;
+  sub?: string;
+  meta?: string;
+  checklist?: string[];
+  cta?: string;
+  showTarget?: boolean;
 }) {
-  const scale = format === "story" ? 1.05 : format === "portrait" ? 0.92 : 0.8;
+  const scale = format === "story" ? 0.92 : format === "square" ? 0.66 : 0.8;
+  const orange = field === "orange";
   return (
-    <PostFrame treatment={treatment} format={format} width={width}>
-      <LogoLockup size={22} />
-      <div className="relative mt-auto">
-        <Doodle
-          kind="circle"
-          className="absolute -top-[0.6em] -left-[0.4em] h-[2.4em] w-[7em]"
-          stroke="var(--on-field)"
-        />
-        <HeadlineBlock
-          eyebrow="Real results"
-          lines={["Meet your", "new web"]}
-          emphasis="agency"
-          sub="When you speak to the right audience in the right tone, positive results are inevitable."
-          scale={scale}
-        />
-        <Doodle kind="bang" className="absolute right-[8%] bottom-[18%] h-[3.2em] w-[1.1em]" />
+    <PostFrame treatment={treatment} format={format} field={field} width={width}>
+      <div className="flex items-start justify-between">
+        <LogoLockup size={format === "square" ? 18 : 22} tone={treatment === "dark" ? "white" : "ink"} />
+        {showTarget && !checklist && (
+          <TargetMark
+            className="w-[16%] shrink-0"
+            color={orange ? "rgba(20,20,20,0.14)" : "var(--accent)"}
+          />
+        )}
       </div>
-      <div className="mt-[6%]">
-        <CTA>Contact us</CTA>
+
+      <div className="mt-[9%] flex flex-1 flex-col">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h2
+          className="mt-[5%] font-bold uppercase leading-[0.98] tracking-[-0.01em]"
+          style={{ fontSize: `${3.1 * scale}rem` }}
+        >
+          {lines.map((l, i) => (
+            <span key={i} className="block">
+              {l}
+            </span>
+          ))}
+        </h2>
+        {highlight && (
+          <div className="mt-[5%] font-bold uppercase leading-[1.05]" style={{ fontSize: `${2.7 * scale}rem` }}>
+            <Highlight tone={orange ? "ink" : "onOrange"}>{highlight}</Highlight>
+          </div>
+        )}
+
+        {checklist && (
+          <div className="mt-[7%] rounded-lg p-[6%]" style={{ background: "#f4f1ea", color: "#141414" }}>
+            <p
+              className="font-semibold uppercase"
+              style={{ fontSize: "0.62rem", letterSpacing: "0.14em", opacity: 0.55 }}
+            >
+              Can visitors quickly tell
+            </p>
+            <ul className="mt-3 flex flex-col gap-2.5">
+              {checklist.map((c) => (
+                <li key={c} className="flex items-center gap-2.5">
+                  <span
+                    className="grid h-5 w-5 place-items-center rounded-sm text-[0.7rem] font-bold text-white"
+                    style={{ background: "#141414" }}
+                  >
+                    ✓
+                  </span>
+                  <span className="font-semibold" style={{ fontSize: "0.95rem" }}>
+                    {c}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-auto pt-[8%]">
+          {!checklist && <Rule className="mb-[6%]" />}
+          {sub && !checklist && (
+            <p className="font-semibold" style={{ fontSize: `${0.95 * scale}rem` }}>
+              {sub}
+            </p>
+          )}
+          {meta && !checklist && (
+            <p className="mt-2 font-medium" style={{ fontSize: "0.72rem", opacity: 0.55 }}>
+              {meta}
+            </p>
+          )}
+          <div className="mt-[7%] flex items-center justify-between">
+            <CTA variant="dark">{cta}</CTA>
+            <span
+              className="font-semibold uppercase"
+              style={{ fontSize: "0.66rem", letterSpacing: "0.1em", opacity: 0.55 }}
+            >
+              @crushinteractive
+            </span>
+          </div>
+        </div>
       </div>
     </PostFrame>
   );
 }
 
-/* 2 — PHOTO-LED: photography dominant, minimal caption + lockup. */
+/* 2 — PHOTO-LED: photography is the protagonist (Cafecito). Full-bleed
+   image, type interacts with the photo, a small series band anchors it. */
 export function PhotoLedPost({
   treatment,
   format,
   src,
   width,
+  series = "Cafecito with Crush",
+  lines = ["Good coffee.", "Smarter", "conversations."],
+  guestLabel = "Meet",
+  guest = "A Crush guest",
+  guestSub = "Miami business owner",
 }: {
   treatment: Treatment;
   format: Format;
   src: string;
   width?: number;
+  series?: string;
+  lines?: string[];
+  guestLabel?: string;
+  guest?: string;
+  guestSub?: string;
 }) {
+  const scale = format === "story" ? 1 : format === "square" ? 0.72 : 0.82;
   return (
-    <PostFrame treatment={treatment} format={format} width={width}>
-      <LogoLockup size={20} />
-      {/* Photo fills the frame; type sits on the image, not above a card. */}
-      <div className="crush-bw-hover relative -mx-[7%] -mb-[7%] mt-[5%] flex-1 overflow-hidden">
-        <MediaFrame
-          src={src}
-          alt="Crush Interactive team sharing coffee and candid conversation"
-          tone="bw"
-          rounded={false}
-          className="h-full w-full"
-        />
-        <span
-          className="absolute left-[8%] top-[7%] font-semibold uppercase tracking-[0.18em] text-white/90"
-          style={{ fontSize: "0.66rem" }}
-        >
-          Cafecito
-        </span>
-        <div
-          className="absolute inset-x-0 bottom-0 p-[8%]"
-          style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.72), transparent)" }}
-        >
-          <p className="font-bold leading-[0.95] text-white" style={{ fontSize: "1.7rem" }}>
-            The people
-            <br />
-            behind the
-            <br />
-            <span className="text-crush-orange">pixels.</span>
-          </p>
+    <PostFrame treatment={treatment} format={format} flush width={width}>
+      <div className="relative flex h-full w-full flex-col">
+        <div className="relative flex-1 overflow-hidden">
+          <MediaFrame src={src} alt="Warm candid portrait of a Crush guest over coffee" className="h-full w-full" />
+          <div className="absolute inset-x-0 top-0 flex items-start justify-between p-[7%]">
+            <div>
+              <LogoLockup size={20} tone="white" />
+              <div className="mt-4">
+                <Eyebrow>{series}</Eyebrow>
+              </div>
+            </div>
+            <span className="h-1.5 w-14 shrink-0" style={{ background: "#f58026" }} />
+          </div>
+          <div
+            className="absolute inset-x-0 bottom-0 p-[7%]"
+            style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.55), transparent)" }}
+          >
+            <h2 className="font-bold uppercase leading-[0.98] text-white" style={{ fontSize: `${1.9 * scale}rem` }}>
+              {lines.map((l, i) => (
+                <span key={i} className="block">
+                  {l}
+                </span>
+              ))}
+            </h2>
+          </div>
+        </div>
+        {/* series band */}
+        <div className="flex items-center justify-between px-[7%] py-[6%]" style={{ background: "#141414" }}>
+          <div>
+            <Eyebrow>{guestLabel}</Eyebrow>
+            <p className="mt-1 font-bold uppercase text-white" style={{ fontSize: `${1.35 * scale}rem`, lineHeight: 1 }}>
+              {guest}
+            </p>
+            <p
+              className="mt-1.5 font-medium uppercase"
+              style={{ fontSize: "0.62rem", letterSpacing: "0.08em", color: "#8f8378" }}
+            >
+              {guestSub}
+            </p>
+          </div>
+          <CoffeeBadge size={format === "square" ? 40 : 52} className="shrink-0" />
         </div>
       </div>
     </PostFrame>
   );
 }
 
-/* 3 — MEDIA SHOWCASE: the website itself is the dominant subject.
-   Renders an actual webpage (WebsiteMock), never a photo in chrome. */
+/* 3 — MEDIA SHOWCASE: the designed website is the hero (Project Reveal).
+   Prefers a dark editorial field with a single orange corner block. */
 export function ShowcasePost({
   treatment,
   format,
   width,
+  eyebrow = "Project Reveal / Website",
+  lines = ["A stronger", "first impression."],
+  cta = "View the work",
 }: {
   treatment: Treatment;
   format: Format;
   width?: number;
+  eyebrow?: string;
+  lines?: string[];
+  cta?: string;
 }) {
+  const scale = format === "story" ? 0.86 : format === "square" ? 0.6 : 0.74;
   return (
     <PostFrame treatment={treatment} format={format} width={width}>
-      <div className="flex items-center justify-between">
-        <LogoLockup size={20} />
-        <span
-          className="font-semibold uppercase tracking-[0.2em]"
-          style={{ fontSize: "0.62rem", color: "var(--accent)" }}
+      {/* orange corner block */}
+      <Block className="absolute right-0 top-0 h-[22%] w-[26%]" />
+      <LogoLockup size={format === "square" ? 18 : 22} tone={treatment === "dark" ? "white" : "ink"} />
+      <div className="mt-[8%]">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h2
+          className="mt-[5%] font-bold uppercase leading-[0.98] tracking-[-0.01em]"
+          style={{ fontSize: `${2.9 * scale}rem` }}
         >
-          Selected work
-        </span>
+          {lines.map((l, i) => (
+            <span key={i} className="block">
+              {l}
+            </span>
+          ))}
+        </h2>
       </div>
-      {/* website dominates the frame */}
-      <div className="mt-auto mb-[7%] -rotate-1">
-        <ScreenshotFrame />
+      <div className="my-auto py-[8%]">
+        <ScreenshotFrame className="rotate-[-2deg]" variant={treatment === "dark" ? "light" : "dark"} />
       </div>
-      <div className="flex items-end justify-between gap-4">
-        <HeadlineBlock lines={["We design", "websites."]} scale={format === "story" ? 0.72 : 0.5} />
-        <span className="pb-1 font-medium" style={{ fontSize: "0.72rem", opacity: 0.8 }}>
-          Explore the project →
+      <div className="flex items-end justify-between">
+        <CTA variant="orange">{cta}</CTA>
+        <span
+          className="font-semibold uppercase"
+          style={{ fontSize: "0.62rem", letterSpacing: "0.12em", opacity: 0.5 }}
+        >
+          Before / After
         </span>
       </div>
     </PostFrame>
   );
 }
 
-/* 4 — SPLIT: message zone + media zone, editorially composed (not a
-   mechanically equal two-column). Image is cropped and dominant. */
+/* 4 — SPLIT: message + media, editorially composed (not a mechanical
+   two-column). Type column is dominant; the image is cropped and reaches
+   past the padding, anchored by an orange block. */
 export function SplitPost({
   treatment,
   format,
   src,
   width,
+  eyebrow = "Before Crush / After Crush",
+  lines = ["New look.", "Same great", "company."],
+  cta = "See the transformation",
 }: {
   treatment: Treatment;
   format: Format;
   width?: number;
   src: string;
+  eyebrow?: string;
+  lines?: string[];
+  cta?: string;
 }) {
   const stack = format === "story";
+  const scale = format === "story" ? 0.82 : format === "square" ? 0.56 : 0.7;
   return (
     <PostFrame treatment={treatment} format={format} width={width}>
-      <LogoLockup size={20} />
-      <div className={`mt-[6%] flex flex-1 gap-[6%] ${stack ? "flex-col" : "flex-row items-stretch"}`}>
-        <div className={`relative ${stack ? "" : "w-[46%] shrink-0"} flex flex-col`}>
-          <span
-            className="font-semibold uppercase tracking-[0.2em]"
-            style={{ fontSize: "0.62rem", color: "var(--accent)" }}
+      <LogoLockup size={format === "square" ? 18 : 22} tone={treatment === "dark" ? "white" : "ink"} />
+      <div className={`mt-[7%] flex flex-1 gap-[7%] ${stack ? "flex-col" : "flex-row items-stretch"}`}>
+        <div className={`relative flex flex-col ${stack ? "" : "w-[52%] shrink-0"}`}>
+          <Eyebrow>{eyebrow}</Eyebrow>
+          <h2
+            className="mt-[6%] font-bold uppercase leading-[0.96] tracking-[-0.01em]"
+            style={{ fontSize: `${2.6 * scale}rem` }}
           >
-            Website project
-          </span>
-          <HeadlineBlock
-            lines={["From", "idea to", "impact"]}
-            scale={format === "square" ? 0.66 : 0.8}
-          />
-          <Doodle kind="arrow" className="mt-auto h-[2.4em] w-[3.4em]" />
+            {lines.map((l, i) => (
+              <span key={i} className="block">
+                {l}
+              </span>
+            ))}
+          </h2>
+          <div className="mt-auto pt-[10%]">
+            <CTA variant="link">{cta}</CTA>
+          </div>
         </div>
-        {/* image reaches past the padding for controlled overlap + crop */}
-        <MediaFrame
-          src={src}
-          alt="Candid collaboration between Crush Interactive and its clients"
-          tone="overlap"
-          className={stack ? "h-1/2 w-full" : "-mr-[7%] -my-[7%] flex-1"}
-          rounded={!stack}
-        />
+        {/* image reaches past the padding for a controlled crop; orange block anchors it */}
+        <div className={`relative ${stack ? "h-1/2 w-full" : "-mr-[8%] -my-[8%] flex-1"}`}>
+          <Block className="absolute -left-3 -top-3 z-10 h-10 w-10" />
+          <MediaFrame src={src} alt="Designed website work presented in context" className="h-full w-full" />
+        </div>
       </div>
     </PostFrame>
   );

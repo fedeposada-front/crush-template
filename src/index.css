@@ -37,30 +37,45 @@ body,
 
 body {
   font-family: var(--font-sans);
-  background: #f4f5f7;
+  background: #e8e5dd;
   color: var(--color-crush-ink);
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---- Treatment modes: the ONLY switch between Original and Dark ---- */
+/* ---- Treatment modes: flat surfaces, the switch between Original and Dark.
+   Surfaces are FLAT (no gradients) — cream or near-black. Orange is used as a
+   graphic intervention (blocks, highlights, marks), never as a default field.
+   `--on-field`/`--surface-field` are retained as aliases of the flat values so
+   existing component references keep resolving. ---- */
 [data-treatment='original'] {
-  --surface: #ffffff;
-  --surface-field: linear-gradient(135deg, #ff5f3d 0%, #f58026 55%, #ffaf52 100%);
-  --on-surface: #1a1614;
-  --on-field: #ffffff;
+  --surface: #f4f1ea;
+  --surface-field: #f4f1ea;
+  --on-surface: #141414;
+  --on-field: #141414;
   --accent: #f58026;
-  --muted: #919295;
-  --hairline: rgba(26, 22, 20, 0.12);
+  --muted: #5b5c5b;
+  --hairline: rgba(20, 20, 20, 0.16);
 }
 
 [data-treatment='dark'] {
-  --surface: #17110d;
-  --surface-field: radial-gradient(120% 120% at 20% 10%, #241a12 0%, #120d09 70%);
-  --on-surface: #f6f1ec;
-  --on-field: #f6f1ec;
+  --surface: #141414;
+  --surface-field: #141414;
+  --on-surface: #f4f1ea;
+  --on-field: #f4f1ea;
   --accent: #f58026;
-  --muted: #8f8378;
-  --hairline: rgba(246, 241, 236, 0.14);
+  --muted: #7d7d7a;
+  --hairline: rgba(244, 241, 234, 0.16);
+}
+
+/* Orange field: a deliberate high-impact surface (e.g. Quick Audit). Type and
+   marks flip to ink so orange stays the field, not a secondary accent. */
+[data-field='orange'] {
+  --surface: #f58026;
+  --surface-field: #f58026;
+  --on-surface: #141414;
+  --on-field: #141414;
+  --accent: #141414;
+  --hairline: rgba(20, 20, 20, 0.22);
 }
 
 /* ---- Signature graphic utilities (ESTABLISHED brand elements) ---- */

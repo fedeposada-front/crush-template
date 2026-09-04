@@ -1,47 +1,104 @@
 import type { CSSProperties, ReactNode } from "react";
 
 /* ------------------------------------------------------------------ *
- * Crush Interactive — Brand Elements & Core Components (plan §13)
- * Each piece is configurable via props; variants only where the
- * structural behaviour differs. Colors resolve from the treatment's
- * semantic aliases (--on-field / --accent), never hard-coded.
+ * Crush Interactive — Brand Elements & Core Components
+ * The visual language is editorial and clean: flat surfaces, confident
+ * Montserrat type, and geometric brand devices (target mark, orange
+ * blocks, skewed highlight, thin rules). Hand-drawn doodles remain
+ * available but are an optional accent, never a default.
+ * Colors resolve from the treatment's semantic aliases.
  * ------------------------------------------------------------------ */
 
 export type Treatment = "original" | "dark";
 export type MediaTone = "color" | "bw" | "overlap";
 
-/* ---------------------------- Logo Lockup --------------------------- */
+/* ---------------------------- Logo Lockup --------------------------- *
+ * CRUSH + orange period, "INTERACTIVE" tracked beneath. The dot is the
+ * one always-orange element; the wordmark itself flips with the surface. */
 export function LogoLockup({
-  size = 28,
-  tone = "field",
+  size = 30,
+  tone = "ink",
   className = "",
 }: {
   size?: number;
-  tone?: "field" | "surface";
+  tone?: "ink" | "white";
   className?: string;
 }) {
-  const color = tone === "field" ? "var(--on-field)" : "var(--on-surface)";
+  const color = tone === "white" ? "#f4f1ea" : "var(--on-surface)";
   return (
-    <div className={`inline-flex items-end gap-[0.35em] leading-none ${className}`} style={{ color }}>
-      <span
-        className="font-bold tracking-[-0.03em]"
-        style={{ fontSize: size, lineHeight: 0.9 }}
-      >
-        CRUSH
-        <span style={{ color: "var(--accent)" }}>_</span>
+    <div className={`inline-flex flex-col leading-none ${className}`} style={{ color }}>
+      <span className="font-bold tracking-[-0.02em]" style={{ fontSize: size, lineHeight: 0.92 }}>
+        CRUSH<span style={{ color: "#f58026" }}>.</span>
       </span>
       <span
-        className="font-medium tracking-[0.02em] pb-[0.12em]"
-        style={{ fontSize: size * 0.38, opacity: 0.9 }}
+        className="font-semibold uppercase"
+        style={{ fontSize: size * 0.235, letterSpacing: "0.34em", marginTop: size * 0.12 }}
       >
-        interactive
+        Interactive
       </span>
     </div>
   );
 }
 
-/* --------------------------- Doodle Accent -------------------------- */
-type DoodleKind = "circle" | "arrow" | "underline" | "spark" | "bang";
+/* --------------------------- Geometric devices ---------------------- *
+ * These clean marks carry the creative energy instead of doodles. */
+
+/* Concentric "target" — the signature Crush graphic accent. */
+export function TargetMark({
+  className = "",
+  color = "var(--accent)",
+  style,
+}: {
+  className?: string;
+  color?: string;
+  style?: CSSProperties;
+}) {
+  return (
+    <svg viewBox="0 0 100 100" className={className} style={style} aria-hidden>
+      <circle cx="50" cy="50" r="44" fill="none" stroke={color} strokeWidth="12" />
+      <circle cx="50" cy="50" r="16" fill={color} />
+    </svg>
+  );
+}
+
+/* An orange block — corner interventions and image placeholders. */
+export function Block({ className = "", style }: { className?: string; style?: CSSProperties }) {
+  return <div className={className} style={{ background: "var(--accent)", ...style }} aria-hidden />;
+}
+
+/* Skewed orange highlight sitting behind a headline line. */
+export function Highlight({
+  children,
+  tone = "onOrange",
+}: {
+  children: ReactNode;
+  tone?: "onOrange" | "ink";
+}) {
+  return (
+    <span
+      className="inline-block -rotate-1 origin-left px-[0.4em] py-[0.12em]"
+      style={{ background: "#f58026", color: tone === "ink" ? "#141414" : "#ffffff" }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/* Full-width hairline rule. */
+export function Rule({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`h-px w-full ${className}`}
+      style={{ background: "var(--on-surface)", opacity: 0.9 }}
+      aria-hidden
+    />
+  );
+}
+
+/* --------------------------- Doodle Accent -------------------------- *
+ * Retained per brand guidelines as an OPTIONAL accent — used sparingly,
+ * never applied to a composition by default. */
+type DoodleKind = "circle" | "arrow" | "underline";
 
 export function Doodle({
   kind,
@@ -65,10 +122,7 @@ export function Doodle({
     case "circle":
       return (
         <svg viewBox="0 0 240 110" className={className} style={style} aria-hidden>
-          <path
-            {...common}
-            d="M62 12c-40 6-64 34-48 62 18 31 118 34 168 14 42-17 40-56-8-70C130 6 92 7 62 12z"
-          />
+          <path {...common} d="M62 12c-40 6-64 34-48 62 18 31 118 34 168 14 42-17 40-56-8-70C130 6 92 7 62 12z" />
         </svg>
       );
     case "arrow":
@@ -84,103 +138,69 @@ export function Doodle({
           <path {...common} d="M6 16c50-10 150-14 208-6" />
         </svg>
       );
-    case "spark":
-      return (
-        <svg viewBox="0 0 60 60" className={className} style={style} aria-hidden>
-          <path {...common} d="M30 6c3 14 10 21 24 24-14 3-21 10-24 24-3-14-10-21-24-24 14-3 21-10 24-24z" />
-        </svg>
-      );
-    case "bang":
-      return (
-        <svg viewBox="0 0 40 120" className={className} style={style} aria-hidden>
-          <path {...common} d="M16 8c4 2 10 4 8 12-3 12-6 40-8 64" />
-          <circle cx="12" cy="104" r="6" fill={stroke} stroke="none" />
-        </svg>
-      );
   }
 }
 
-/* --------------------------- Headline Block ------------------------- */
-export function HeadlineBlock({
-  eyebrow,
-  lines,
-  emphasis,
-  sub,
-  align = "left",
-  scale = 1,
-}: {
-  eyebrow?: string;
-  lines: string[];
-  emphasis?: string; // word rendered as stroke text
-  sub?: string;
-  align?: "left" | "center";
-  scale?: number;
-}) {
-  return (
-    <div
-      className={`flex flex-col gap-[0.5em] ${align === "center" ? "items-center text-center" : "items-start"}`}
-      style={{ color: "var(--on-field)" }}
-    >
-      {eyebrow && (
-        <span
-          className="font-semibold uppercase tracking-[0.22em]"
-          style={{ fontSize: `${0.85 * scale}rem`, color: "var(--accent)" }}
-        >
-          {eyebrow}
-        </span>
-      )}
-      <h2
-        className="font-bold leading-[0.98] tracking-[-0.02em]"
-        style={{ fontSize: `${3.1 * scale}rem` }}
-      >
-        {lines.map((l, i) => (
-          <span key={i} className="block">
-            {l}
-          </span>
-        ))}
-        {emphasis && (
-          <span className="crush-stroke-text block" style={{ color: "var(--on-field)" }}>
-            {emphasis}
-          </span>
-        )}
-      </h2>
-      {sub && (
-        <p
-          className="font-medium max-w-[42ch]"
-          style={{ fontSize: `${1.05 * scale}rem`, opacity: 0.92, lineHeight: 1.45 }}
-        >
-          {sub}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* ------------------------------ Tag / CTA --------------------------- */
-export function Tag({ children }: { children: ReactNode }) {
+/* --------------------------- Eyebrow / Headline --------------------- */
+export function Eyebrow({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <span
-      className="inline-block font-semibold uppercase tracking-[0.14em] px-3 py-1 rounded-full text-[0.72rem]"
-      style={{ background: "var(--accent)", color: "#fff" }}
+      className={`font-semibold uppercase ${className}`}
+      style={{ fontSize: "0.7rem", letterSpacing: "0.16em", color: "var(--accent)" }}
     >
       {children}
     </span>
   );
 }
 
-export function CTA({ children }: { children: ReactNode }) {
+/* ------------------------------ CTA / label ------------------------- */
+export function CTA({
+  children,
+  variant = "dark",
+}: {
+  children: ReactNode;
+  variant?: "dark" | "orange" | "link";
+}) {
+  if (variant === "link") {
+    return (
+      <span
+        className="inline-flex items-center gap-2 font-semibold uppercase"
+        style={{ fontSize: "0.72rem", letterSpacing: "0.14em", color: "var(--on-surface)" }}
+      >
+        {children}
+        <span aria-hidden style={{ color: "var(--accent)" }}>
+          →
+        </span>
+      </span>
+    );
+  }
+  const dark = variant === "dark";
   return (
-    <button
-      className="inline-flex items-center gap-2 font-semibold uppercase tracking-[0.12em] text-[0.8rem] px-5 py-2.5 rounded-full transition-transform duration-200 hover:-translate-y-0.5"
+    <span
+      className="inline-flex items-center font-semibold uppercase rounded-full px-6 py-2.5"
       style={{
-        background: "var(--on-field)",
-        color: "var(--accent)",
-        boxShadow: "0 6px 22px -10px rgba(0,0,0,0.5)",
+        fontSize: "0.72rem",
+        letterSpacing: "0.12em",
+        background: dark ? "var(--on-surface)" : "#f58026",
+        color: dark ? "var(--surface)" : "#ffffff",
       }}
     >
       {children}
-      <span aria-hidden>→</span>
-    </button>
+    </span>
+  );
+}
+
+/* Coffee-cup badge — the Cafecito series mark (orange disc, cup knockout). */
+export function CoffeeBadge({ size = 56, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className} aria-hidden>
+      <circle cx="50" cy="50" r="50" fill="#f58026" />
+      <g fill="none" stroke="#141414" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M30 40h32v18a12 12 0 0 1-12 12H42a12 12 0 0 1-12-12z" />
+        <path d="M62 44h8a8 8 0 0 1 0 16h-8" />
+        <path d="M34 26c0 4-3 5-3 8M46 26c0 4-3 5-3 8M58 26c0 4-3 5-3 8" />
+      </g>
+    </svg>
   );
 }
 
@@ -190,7 +210,7 @@ export function MediaFrame({
   alt,
   tone = "color",
   className = "",
-  rounded = true,
+  rounded = false,
 }: {
   src: string;
   alt: string;
@@ -200,9 +220,7 @@ export function MediaFrame({
 }) {
   return (
     <div
-      className={`relative overflow-hidden ${rounded ? "rounded-2xl" : ""} ${
-        tone === "bw" ? "crush-bw-hover" : ""
-      } ${className}`}
+      className={`relative overflow-hidden ${rounded ? "rounded-md" : ""} ${tone === "bw" ? "crush-bw-hover" : ""} ${className}`}
       style={{ background: "var(--muted)" }}
     >
       <img
@@ -214,74 +232,69 @@ export function MediaFrame({
       {tone === "overlap" && (
         <div
           className="absolute inset-0"
-          style={{
-            background: "linear-gradient(180deg, rgba(245,128,38,0) 30%, rgba(245,128,38,0.82) 100%)",
-            mixBlendMode: "multiply",
-          }}
+          style={{ background: "rgba(245,128,38,0.78)", mixBlendMode: "multiply" }}
         />
       )}
     </div>
   );
 }
 
-/* Website screenshot frame — keeps chrome minimal so the site stays
-   dominant when it is the subject (plan §14). Renders whatever website
-   content is passed as children; never a bare photograph dressed up as
-   a site. Falls back to a neutral WebsiteMock. */
+/* Website screenshot frame — a clean, tilted browser presenting designed
+   work. Chrome is minimal so the site stays the subject. Renders a neutral
+   WebsiteMock by default; never a photograph dressed up as a site. */
 export function ScreenshotFrame({
-  url = "crush-interactive.com",
   className = "",
+  variant = "light",
   children,
 }: {
-  url?: string;
   className?: string;
+  variant?: "light" | "dark";
   children?: ReactNode;
 }) {
+  const dark = variant === "dark";
   return (
     <figure
-      className={`overflow-hidden rounded-lg bg-white shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)] ${className}`}
+      className={`overflow-hidden rounded-xl ${className}`}
+      style={{
+        background: dark ? "#1d1d1d" : "#ffffff",
+        boxShadow: "0 30px 60px -30px rgba(0,0,0,0.5)",
+      }}
     >
-      <div className="flex items-center gap-1.5 border-b border-black/10 px-3 py-2">
-        <span className="h-2 w-2 rounded-full bg-[#ff5f57]" />
-        <span className="h-2 w-2 rounded-full bg-[#febc2e]" />
-        <span className="h-2 w-2 rounded-full bg-[#28c840]" />
-        <span className="ml-2 truncate text-[0.62rem] font-medium text-crush-light-grey">{url}</span>
+      <div
+        className="flex items-center gap-1.5 px-3 py-2.5"
+        style={{ background: dark ? "#242424" : "#ede9e1" }}
+      >
+        <span className="h-2 w-2 rounded-full" style={{ background: "#f58026" }} />
+        <span className="h-2 w-2 rounded-full" style={{ background: dark ? "#4a4a4a" : "#c9c4b8" }} />
+        <span className="h-2 w-2 rounded-full" style={{ background: dark ? "#4a4a4a" : "#c9c4b8" }} />
       </div>
-      {children ?? <WebsiteMock />}
+      {children ?? <WebsiteMock variant={variant} />}
     </figure>
   );
 }
 
-/* Neutral placeholder that reads unmistakably as a *website* built by
-   Crush — no invented client, name, or metric. Communicates
-   "Crush designs websites" through layout alone. */
-export function WebsiteMock() {
+/* Neutral placeholder that reads unmistakably as designed website work — no
+   invented client, name, or metric. Communicates "Crush designs websites"
+   through clean geometric layout alone. */
+export function WebsiteMock({ variant = "light" }: { variant?: "light" | "dark" }) {
+  const dark = variant === "dark";
+  const bar = dark ? "#3a3a3a" : "#d8d3c8";
   return (
-    <div className="bg-white text-crush-ink">
-      {/* site nav */}
-      <div className="flex items-center justify-between px-3 py-1.5">
-        <span className="text-[0.5rem] font-bold tracking-tight">
-          CRUSH<span className="text-crush-orange">_</span>
-        </span>
-        <div className="flex gap-1.5">
-          <span className="h-1 w-4 rounded-full bg-crush-ink/15" />
-          <span className="h-1 w-4 rounded-full bg-crush-ink/15" />
-          <span className="h-1 w-4 rounded-full bg-crush-ink/15" />
+    <div className="p-5" style={{ background: dark ? "#1d1d1d" : "#ffffff" }}>
+      <div className="h-1.5 w-24 rounded-full" style={{ background: "#f58026" }} />
+      <div className="mt-3 flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <div className="h-3 w-4/5 rounded-sm" style={{ background: dark ? "#f4f1ea" : "#141414" }} />
+          <div className="mt-2 h-2 w-2/3 rounded-full" style={{ background: bar }} />
+          <div className="mt-4 h-4 w-20 rounded-full" style={{ background: "#f58026" }} />
+        </div>
+        {/* image placeholder: orange block in a soft frame */}
+        <div className="rounded-md p-2.5" style={{ background: dark ? "#3a2b1c" : "#fce6d0" }}>
+          <div className="h-14 w-14 rounded-md" style={{ background: "#f58026" }} />
         </div>
       </div>
-      {/* hero */}
-      <div className="relative bg-gradient-to-br from-[#ff5f3d] via-crush-orange to-crush-peach px-3 py-4">
-        <div className="h-1.5 w-10 rounded-full bg-white/70" />
-        <div className="mt-1.5 h-2.5 w-3/4 rounded-sm bg-white/90" />
-        <div className="mt-1 h-2.5 w-1/2 rounded-sm bg-white/90" />
-        <div className="mt-2 h-2 w-12 rounded-full bg-white" />
-      </div>
-      {/* content rows */}
-      <div className="grid grid-cols-3 gap-1.5 p-3">
-        <div className="aspect-video rounded-sm bg-crush-ink/8" />
-        <div className="aspect-video rounded-sm bg-crush-ink/8" />
-        <div className="aspect-video rounded-sm bg-crush-ink/8" />
-      </div>
+      <div className="mt-5 h-px w-full" style={{ background: bar }} />
+      <div className="mt-3 h-2 w-1/2 rounded-full" style={{ background: bar }} />
     </div>
   );
 }
